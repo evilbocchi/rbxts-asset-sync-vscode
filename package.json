@@ -4,6 +4,7 @@
     "description": "VS Code integration with rbxtsas",
     "version": "1.0.0",
     "publisher": "evilbocchi",
+    "icon": "icon.png",
     "engines": {
         "vscode": "^1.101.0"
     },
