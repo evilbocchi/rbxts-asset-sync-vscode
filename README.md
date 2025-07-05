@@ -1,5 +1,7 @@
 # rbxts-asset-sync-vscode
 
+View the extension here: https://marketplace.visualstudio.com/items?itemName=evilbocchi.rbxtsasvs
+
 VS Code extension for seamless integration with [rbxts-asset-sync](https://github.com/evilbocchi/rbxts-asset-sync) projects. This extension provides hover previews, asset navigation, and audio preview commands for Roblox asset references in TypeScript projects.
 
 ## Features
