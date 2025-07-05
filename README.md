@@ -1,71 +1,46 @@
-# rbxtsasvs README
+# rbxts-asset-sync-vscode
 
-This is the README for your extension "rbxtsasvs". After writing up a brief description, we recommend including the following sections.
+VS Code extension for seamless integration with [rbxts-asset-sync](https://github.com/evilbocchi/rbxts-asset-sync) projects. This extension provides hover previews, asset navigation, and audio preview commands for Roblox asset references in TypeScript projects.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Hover Previews:**  
+  Hover over `getAsset("assets/yourAsset.ext")` calls to see Roblox asset IDs, quick links to open the asset, and inline previews for images and audio.
 
-For example if there is an image subfolder under your extension project workspace:
+- **Go to Definition:**  
+  Ctrl+Click or F12 on asset paths to jump directly to the corresponding asset file in your workspace.
 
-\!\[feature X\]\(images/feature-x.png\)
+- **Audio Preview:**  
+  Use the "Preview Audio" command or click the preview link in hovers to open a webview with an interactive audio player for `.mp3`, `.ogg`, or `.wav` assets.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Usage
+
+1. Open a project containing an `assetMap.ts` file mapping asset paths to Roblox asset IDs.
+2. Hover over `getAsset("assets/yourAsset.ext")` in your TypeScript code to see asset info and previews.
+3. Click the 📂 link to open the asset file, or ▶️ to preview audio assets.
+4. Use "Go to Definition" on asset paths to jump to the file.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+- VS Code 1.101.0 or newer
+- A workspace with an `assetMap.ts` file mapping asset paths to Roblox asset IDs
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension does not add any custom settings.
 
-For example:
+## Development
 
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- Clone the repo and run `npm install`
+- Use `npm run watch` to build the extension in watch mode
+- Press `F5` in VS Code to launch a new Extension Development Host
+- Tests are in `src/test/extension.test.ts` and can be run with the provided tasks
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- Only supports asset maps in TypeScript format (`assetMap.ts`)
+- Asset previews are limited to common image and audio formats
 
-## Release Notes
+## License
 
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+MIT

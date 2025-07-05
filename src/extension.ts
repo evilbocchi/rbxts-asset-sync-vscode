@@ -1,26 +1,66 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { AssetDefinitionProvider, AssetHoverProvider } from './assetHoverProvider';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+    console.log('rbx-asset-sync-vscode activated');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "rbxtsasvs" is now active!');
+    // Register hover provider for .ts and .tsx files
+    const assetHover = vscode.languages.registerHoverProvider(
+        [{ language: 'typescript', scheme: 'file' }, { language: 'typescriptreact', scheme: 'file' }],
+        new AssetHoverProvider()
+    );
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('rbxtsasvs.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from rbxts-asset-sync-vscode!');
-	});
+    const definitionProvider = vscode.languages.registerDefinitionProvider(
+        [{ language: 'typescript', scheme: 'file' }, { language: 'typescriptreact', scheme: 'file' }],
+        new AssetDefinitionProvider()
+    );
 
-	context.subscriptions.push(disposable);
+    const previewCommand = vscode.commands.registerCommand('rbxAssetSync.previewAudio', async (fileUri: string) => {
+        const decodedPath = decodeURIComponent(fileUri.replace('file://', ''));
+        const panel = vscode.window.createWebviewPanel(
+            'audioPreview',
+            'Audio Preview',
+            vscode.ViewColumn.Beside,
+            { enableScripts: true, localResourceRoots: [vscode.Uri.file(vscode.workspace.rootPath || '')] }
+        );
+
+        const webviewUri = panel.webview.asWebviewUri(vscode.Uri.file(decodedPath));
+
+        const html = `<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #waveform { width: 100%; height: 128px; margin-bottom: 10px; }
+    button { font-size: 1rem; padding: 4px 12px; }
+  </style>
+</head>
+<body>
+  <h2>Audio Preview</h2>
+  <div id="waveform"></div>
+  <button onclick="wavesurfer.playPause()">▶️ Play / Pause</button>
+
+  <script>
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: '#ccc',
+      progressColor: '#007acc',
+      height: 96,
+      responsive: true
+    });
+    wavesurfer.load('${webviewUri}');
+  </script>
+</body>
+</html>`;
+
+        panel.webview.html = html;
+    });
+
+
+
+    context.subscriptions.push(assetHover, previewCommand);
+    context.subscriptions.push(definitionProvider);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }
