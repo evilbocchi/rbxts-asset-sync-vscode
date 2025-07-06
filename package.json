@@ -2,7 +2,7 @@
     "name": "rbxtsasvs",
     "displayName": "rbxts-asset-sync-vscode",
     "description": "VS Code integration with rbxtsas",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "publisher": "evilbocchi",
     "icon": "icon.png",
     "engines": {
