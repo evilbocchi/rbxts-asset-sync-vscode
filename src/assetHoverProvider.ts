@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 
 export class AssetHoverProvider implements vscode.HoverProvider {
     private assetMap: Record<string, string> = {};
+    private filenameToPaths: Record<string, string[]> = {};
     private watcher?: vscode.FileSystemWatcher;
 
     constructor() {
@@ -46,6 +47,8 @@ export class AssetHoverProvider implements vscode.HoverProvider {
     }
 
     private loadAssetMap() {
+        this.assetMap = {};
+        this.filenameToPaths = {};
         const mapPath = this.findAssetMapPath();
         if (!mapPath) {
             return;
@@ -53,9 +56,14 @@ export class AssetHoverProvider implements vscode.HoverProvider {
 
         if (fs.existsSync(mapPath)) {
             const raw = fs.readFileSync(mapPath, 'utf8');
-            const matches = [...raw.matchAll(/"(assets\/[^\"]+)": \"rbxassetid:\/\/(\d+)\"/g)];
+            const matches = [...raw.matchAll(/"([^"]+)": \"rbxassetid:\/\/(\d+)\"/g)];
             for (const [, assetPath, id] of matches) {
                 this.assetMap[assetPath] = id;
+                const filename = assetPath.split('/').pop() || assetPath;
+                if (!this.filenameToPaths[filename]) {
+                    this.filenameToPaths[filename] = [];
+                }
+                this.filenameToPaths[filename].push(assetPath);
             }
         }
     }
@@ -81,25 +89,36 @@ export class AssetHoverProvider implements vscode.HoverProvider {
             return;
         }
 
+        // Match any function call with a string argument (any prefix)
         const line = document.lineAt(position.line).text;
-        const match = line.match(/getAsset\("([^"]+)"\)/);
+        const match = line.match(/([a-zA-Z0-9_]+)\("([^"]+)"\)/);
         if (!match) {
             return;
         }
 
-        const assetPath = match[1];
-        const assetId = this.assetMap[assetPath];
+        const assetPathOrFilename = match[2];
+        let assetId = this.assetMap[assetPathOrFilename];
+        let resolvedAssetPath = assetPathOrFilename;
+
+        // If not found, try to find a unique asset path that ends with the filename using the index
         if (!assetId) {
-            return;
+            const filename = assetPathOrFilename.split('/').pop() || assetPathOrFilename;
+            const possiblePaths = this.filenameToPaths[filename] || [];
+            if (possiblePaths.length === 1) {
+                resolvedAssetPath = possiblePaths[0];
+                assetId = this.assetMap[resolvedAssetPath];
+            } else {
+                return;
+            }
         }
 
-        const fullPath = path.resolve(this.getWorkspaceRoot(), assetPath);
+        const fullPath = path.resolve(this.getWorkspaceRoot(), resolvedAssetPath);
         const uri = vscode.Uri.file(fullPath);
-        const ext = path.extname(assetPath).toLowerCase();
+        const ext = path.extname(resolvedAssetPath).toLowerCase();
 
         const hoverText = new vscode.MarkdownString();
         hoverText.appendMarkdown(`rbxassetid://${assetId}\n\n`);
-        hoverText.appendMarkdown(`[📂 Open \`${assetPath}\`](command:vscode.open?${encodeURIComponent(JSON.stringify(uri.toString()))})\n\n`);
+        hoverText.appendMarkdown(`[📂 Open \`${resolvedAssetPath}\`](command:vscode.open?${encodeURIComponent(JSON.stringify(uri.toString()))})\n\n`);
 
         if ([".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(ext)) {
             const imageUri = uri.with({ scheme: 'vscode-resource' });
